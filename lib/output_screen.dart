@@ -22,33 +22,53 @@ class OutputScreen extends StatelessWidget {
     this.selectedDate,
   });
 
+  Widget buildInfo(String title, String value, IconData icon) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 10),
+      child: ListTile(
+        leading: Icon(icon),
+        title: Text(title),
+        subtitle: Text(value),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Form Output'),
+        centerTitle: true,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text('Username: $username'),
-            Text('Password: $password'),
-            Text('Email: $email'),
-            Text('Remember Me: $rememberMe'),
-            Text('Gender: $gender'),
-            Text('Country: $country'),
-            Text('Age: ${age?.round()}'),
-            Text('Selected Date: ${selectedDate?.toLocal().toString().split(' ')[0] ?? 'Not selected'}'),
-            const SizedBox(height: 20.0),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context); // Go back to the form screen
-              },
-              child: const Text('Go Back'),
-            ),
-          ],
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF0F172A), Color(0xFF111827)],
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              buildInfo('Username', '$username', Icons.person),
+              buildInfo('Email', '$email', Icons.email),
+              buildInfo('Gender', '$gender', Icons.transgender),
+              buildInfo('Country', '$country', Icons.flag),
+              buildInfo('Age', '${age?.round()}', Icons.cake),
+              buildInfo(
+                'Date',
+                selectedDate == null
+                    ? "Not selected"
+                    : "${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}",
+                Icons.calendar_month,
+              ),
+              const Spacer(),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Go Back'),
+              ),
+            ],
+          ),
         ),
       ),
     );

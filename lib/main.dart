@@ -12,15 +12,19 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Smart Registration',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
         brightness: Brightness.dark,
-        colorScheme: ColorScheme.dark(
-          primary: const Color(0xFF6366F1),
-          secondary: const Color(0xFF8B5CF6),
-          surface: const Color(0xFF1F2937),
+        colorScheme: const ColorScheme.dark(
+          primary: Color(0xFF6366F1),
+          secondary: Color(0xFF8B5CF6),
         ),
-        scaffoldBackgroundColor: const Color(0xFF111827),
+        inputDecorationTheme: const InputDecorationTheme(
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(12)),
+          ),
+        ),
       ),
       home: const RegistrationScreen(),
     );
@@ -36,6 +40,7 @@ class RegistrationScreen extends StatefulWidget {
 
 class _RegistrationScreenState extends State<RegistrationScreen> {
   final _formKey = GlobalKey<FormState>();
+
   String? _username;
   String? _password;
   String? _email;
@@ -45,12 +50,18 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   double _age = 18;
   DateTime? _selectedDate;
 
-  final List<String> _countries = ['Palestine', 'Jordan', 'Eygpt', 'Syrya', 'Iraq'];
-  final List<String> _genders = ['Male', 'Female'];
+  final List<String> _countries = [
+    'Palestine',
+    'Jordan',
+    'Egypt',
+    'Syria',
+    'Iraq'
+  ];
 
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
+
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -70,205 +81,209 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   }
 
   Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
+    final picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
       firstDate: DateTime(1900),
       lastDate: DateTime(2050),
     );
-    if (picked != null && picked != _selectedDate) {
-      setState(() {
-        _selectedDate = picked;
-      });
+
+    if (picked != null) {
+      setState(() => _selectedDate = picked);
     }
+  }
+
+  Widget buildField(Widget child) {
+    return Card(
+      elevation: 3,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: child,
+      ),
+    );
+  }
+
+  Widget genderRadio(String value, String label) {
+    return Row(
+      children: [
+        Radio<String>(
+          value: value,
+          groupValue: _gender,
+          onChanged: (val) {
+            setState(() {
+              _gender = val;
+            });
+          },
+        ),
+        Text(label),
+      ],
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Flutter Form Demo'),
+        title: const Text('Smart Registration'),
+        centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              TextFormField(
-                decoration: const InputDecoration(
-                  labelText: 'Username',
-                  hintText: 'Enter your username',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your username';
-                  }
-                  return null;
-                },
-                onSaved: (value) {
-                  _username = value;
-                },
-              ),
-              const SizedBox(height: 16.0),
-              TextFormField(
-                decoration: const InputDecoration(
-                  labelText: 'Password',
-                  hintText: 'Enter your password',
-                  border: OutlineInputBorder(),
-                ),
-                obscureText: true,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your password';
-                  }
-                  if (value.length < 6) {
-                    return 'Password must be at least 6 characters';
-                  }
-                  return null;
-                },
-                onSaved: (value) {
-                  _password = value;
-                },
-              ),
-              const SizedBox(height: 16.0),
-              TextFormField(
-                decoration: const InputDecoration(
-                  labelText: 'Email',
-                  hintText: 'Enter your email',
-                  border: OutlineInputBorder(),
-                ),
-                keyboardType: TextInputType.emailAddress,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your email';
-                  }
-                  if (!value.contains('@')) {
-                    return 'Please enter a valid email';
-                  }
-                  return null;
-                },
-                onSaved: (value) {
-                  _email = value;
-                },
-              ),
-              const SizedBox(height: 16.0),
-              CheckboxListTile(
-                title: const Text('Remember me'),
-                value: _rememberMe,
-                onChanged: (bool? value) {
-                  setState(() {
-                    _rememberMe = value ?? false;
-                  });
-                },
-                controlAffinity: ListTileControlAffinity.leading,
-              ),
-              const SizedBox(height: 16.0),
-              DropdownButtonFormField<String>(
-                decoration: const InputDecoration(
-                  labelText: 'Gender',
-                  border: OutlineInputBorder(),
-                ),
-                initialValue: _gender,
-                items: _genders.map((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value.toLowerCase(),
-                    child: Text(value),
-                  );
-                }).toList(),
-                onChanged: (String? newValue) {
-                  setState(() {
-                    _gender = newValue;
-                  });
-                },
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please select a gender';
-                  }
-                  return null;
-                },
-                onSaved: (value) {
-                  _gender = value;
-                },
-              ),
-              const SizedBox(height: 16.0),
-              DropdownButtonFormField<String>(
-                decoration: const InputDecoration(
-                  labelText: 'Country',
-                  border: OutlineInputBorder(),
-                ),
-                initialValue: _country,
-                items: _countries.map((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
-                onChanged: (String? newValue) {
-                  setState(() {
-                    _country = newValue;
-                  });
-                },
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please select a country';
-                  }
-                  return null;
-                },
-                onSaved: (value) {
-                  _country = value;
-                },
-              ),
-              const SizedBox(height: 16.0),
-              Row(
-                children: <Widget>[
-                  const Text('Age: '),
-                  Expanded(
-                    child: Slider(
-                      value: _age,
-                      min: 18,
-                      max: 99,
-                      divisions: 81,
-                      label: _age.round().toString(),
-                      onChanged: (double value) {
-                        setState(() {
-                          _age = value;
-                        });
-                      },
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF0F172A), Color(0xFF111827)],
+          ),
+        ),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+
+                buildField(
+                  TextFormField(
+                    decoration: const InputDecoration(
+                      prefixIcon: Icon(Icons.person),
+                      labelText: 'Username',
                     ),
+                    validator: (v) =>
+                        v!.isEmpty ? 'Enter username' : null,
+                    onSaved: (v) => _username = v,
                   ),
-                  Text(_age.round().toString()),
-                ],
-              ),
-              const SizedBox(height: 16.0),
-              InkWell(
-                onTap: () => _selectDate(context),
-                child: InputDecorator(
-                  decoration: const InputDecoration(
-                    labelText: 'Select Date',
-                    border: OutlineInputBorder(),
+                ),
+
+                buildField(
+                  TextFormField(
+                    decoration: const InputDecoration(
+                      prefixIcon: Icon(Icons.lock),
+                      labelText: 'Password',
+                    ),
+                    obscureText: true,
+                    validator: (v) =>
+                        v!.length < 6 ? 'Min 6 characters' : null,
+                    onSaved: (v) => _password = v,
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Text(
-                        _selectedDate == null
-                            ? 'No date selected'
-                            : '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}',
+                ),
+
+                buildField(
+                  TextFormField(
+                    decoration: const InputDecoration(
+                      prefixIcon: Icon(Icons.email),
+                      labelText: 'Email',
+                    ),
+                    validator: (v) =>
+                        v!.contains('@') ? null : 'Invalid email',
+                    onSaved: (v) => _email = v,
+                  ),
+                ),
+
+                CheckboxListTile(
+                  title: const Text('Remember me'),
+                  value: _rememberMe,
+                  onChanged: (v) {
+                    setState(() => _rememberMe = v ?? false);
+                  },
+                ),
+
+                // ✅ GENDER RADIO BUTTONS
+                buildField(
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        "Gender",
+                        style: TextStyle(fontWeight: FontWeight.bold),
                       ),
-                      const Icon(Icons.calendar_today),
+                      Row(
+                        children: [
+                          genderRadio("male", "Male"),
+                          genderRadio("female", "Female"),
+                        ],
+                      ),
                     ],
                   ),
                 ),
-              ),
-              const SizedBox(height: 24.0),
-              ElevatedButton(
-                onPressed: _submitForm,
-                child: const Text('Submit'),
-              ),
-            ],
+
+                // COUNTRY
+                buildField(
+                  DropdownButtonFormField<String>(
+                    decoration: const InputDecoration(
+                      labelText: 'Country',
+                    ),
+                    items: _countries
+                        .map(
+                          (e) => DropdownMenuItem(
+                            value: e,
+                            child: Text(e),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (v) => _country = v,
+                  ),
+                ),
+
+                Row(
+                  children: [
+                    const Text("Age"),
+                    Expanded(
+                      child: Slider(
+                        value: _age,
+                        min: 18,
+                        max: 99,
+                        divisions: 81,
+                        label: _age.round().toString(),
+                        onChanged: (v) => setState(() => _age = v),
+                      ),
+                    ),
+                    Text(_age.round().toString()),
+                  ],
+                ),
+
+                InkWell(
+                  onTap: () => _selectDate(context),
+                  child: buildField(
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          _selectedDate == null
+                              ? "Select Date"
+                              : "${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}",
+                        ),
+                        const Icon(Icons.calendar_today),
+                      ],
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                // ✅ FIXED BUTTON
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    icon: const Icon(Icons.send),
+                    label: const Text("Submit"),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      backgroundColor: const Color(0xFF6366F1),
+                       foregroundColor: Colors.white,
+                      textStyle: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    onPressed: _submitForm,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
